@@ -1,0 +1,101 @@
+// Initial random seed:
+4938956181488036246
+
+// RunInitializeCallbacks():
+initializeSLiMModelType(modelType = 'nonWF');
+initializeSLiMOptions(keepPedigrees = T, dimensionality = 'xy');
+initializeTreeSeq();
+===========================
+Model constants: {
+	"HEIGHT" = 25.0
+	"K" = 5
+	"L" = 100000000
+	"MU" = 0
+	"PARAMFILE" = "./params.json"
+	"PERCENT_PER_TICK" = 0.05
+	"PWD" = "/home/chtalbot/gaia_testing/gaia_testing"
+	"R" = 1.0e-08
+	"REP" = 1
+	"RUNTIME" = 30000
+	"SAMPLE_FREQ" = 5
+	"SAMPLE_PERC" = 0.01
+	"SD" = 0.3
+	"SEED" = 4938956181488036246
+	"SM" = 0.3
+	"SX" = 0.3
+	"WIDTH" = 25.0
+}
+===========================
+initializeMutationRate(0);
+initializeMutationType(1, 0.5, "f", 0);
+initializeGenomicElementType(1, m1, 1);
+initializeGenomicElement(g1, 0, 99999999);
+initializeRecombinationRate(1e-08);
+initializeInteractionType(1, "xy", reciprocal=T, maxDistance=0.9);
+initializeInteractionType(2, "xy", reciprocal=T, maxDistance=0.9);
+
+// Starting run at tick <start>:
+1 
+
+"Logged row for tick 29700"
+"Logged row for tick 29705"
+"Logged row for tick 29710"
+"Logged row for tick 29715"
+"Logged row for tick 29720"
+"Logged row for tick 29725"
+"Logged row for tick 29730"
+"Logged row for tick 29735"
+"Logged row for tick 29740"
+"Logged row for tick 29745"
+"Logged row for tick 29750"
+"Logged row for tick 29755"
+"Logged row for tick 29760"
+"Logged row for tick 29765"
+"Logged row for tick 29770"
+"Logged row for tick 29775"
+"Logged row for tick 29780"
+"Logged row for tick 29785"
+"Logged row for tick 29790"
+"Logged row for tick 29795"
+"Logged row for tick 29800"
+"Logged row for tick 29805"
+"Logged row for tick 29810"
+"Logged row for tick 29815"
+"Logged row for tick 29820"
+"Logged row for tick 29825"
+"Logged row for tick 29830"
+"Logged row for tick 29835"
+"Logged row for tick 29840"
+"Logged row for tick 29845"
+"Logged row for tick 29850"
+"Logged row for tick 29855"
+"Logged row for tick 29860"
+"Logged row for tick 29865"
+"Logged row for tick 29870"
+"Logged row for tick 29875"
+"Logged row for tick 29880"
+"Logged row for tick 29885"
+"Logged row for tick 29890"
+"Logged row for tick 29895"
+"Logged row for tick 29900"
+"Logged row for tick 29905"
+"Logged row for tick 29910"
+"Logged row for tick 29915"
+"Logged row for tick 29920"
+"Logged row for tick 29925"
+"Logged row for tick 29930"
+"Logged row for tick 29935"
+"Logged row for tick 29940"
+"Logged row for tick 29945"
+"Logged row for tick 29950"
+"Logged row for tick 29955"
+"Logged row for tick 29960"
+"Logged row for tick 29965"
+"Logged row for tick 29970"
+"Logged row for tick 29975"
+"Logged row for tick 29980"
+"Logged row for tick 29985"
+"Logged row for tick 29990"
+"Logged row for tick 29995"
+"Logged row for tick 30000"
+End of simulation (run time reached)
