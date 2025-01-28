@@ -1,0 +1,11 @@
+
+    Provides Bioinformatics software.
+    For more information please use:
+
+        $ module help Bioinformatics
+
+
+Starting simulation REP=1 on node gl3175.arc-ts.umich.edu at Mon Jan 27 20:56:17 EST 2025
+Current working directory: /home/chtalbot/gaia_testing/gaia_testing
+SLURM Job ID: 20210258, Array Task ID: 1
+Completed simulation REP=1 at Mon Jan 27 21:11:41 EST 2025
