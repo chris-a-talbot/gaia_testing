@@ -18,7 +18,8 @@
 8. Run `analyze_gaia.py` to analyze the accuracy of geographic inference from gaia.
 
 ### Example
-To run the pipeline for a single replicate named 'tree-S0.3-R1', run the following commands.
+
+To run the pipeline for a single replicate named 'tree-S0.3-R1', run the following commands from the root directory.
 
 Replacing `<replicate ID>` with `1`, `<dispersal>` with `0.3`, and `<CWD>` with the current working directory:
 
