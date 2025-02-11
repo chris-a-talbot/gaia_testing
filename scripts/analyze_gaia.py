@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Gets basic accuracy metrics from gaia inferences
+# Path: scripts/analyze_gaia.py
+# Run from the root directory with `python ./scripts/analyze_gaia.py <tree_name>`
+
 import os
 import sys
 import logging

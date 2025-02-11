@@ -10,7 +10,7 @@
 #SBATCH --array=1-10
 #SBATCH --account=lsa1
 #SBATCH --partition=standard
-#SBATCH --output=./logs/%x-%A_%a.log
+#SBATCH --output=./logs/hpc/%x-%A_%a.log
 
 set -e
 
@@ -24,6 +24,6 @@ echo "Starting simulation REP=${SLURM_ARRAY_TASK_ID} on node $(hostname) at $(da
 echo "Current working directory: $CWD"
 echo "SLURM Job ID: $SLURM_JOB_ID, Array Task ID: $SLURM_ARRAY_TASK_ID"
 
-slim -d "PWD='$CWD'" -d "S=0.3" -d "REP=${SLURM_ARRAY_TASK_ID}" -d "RUNTIME=45000" simulation.slim > "${CWD}/logs/simulation_rep_${SLURM_ARRAY_TASK_ID}.log" 2>&1
+slim -d "PWD='$CWD'" -d "S=0.3" -d "REP=${SLURM_ARRAY_TASK_ID}" -d "RUNTIME=40000" simulation.slim > "${CWD}/logs/slim/simulation_rep_${SLURM_ARRAY_TASK_ID}.log" 2>&1
 
 echo "Completed simulation REP=${SLURM_ARRAY_TASK_ID} at $(date)"

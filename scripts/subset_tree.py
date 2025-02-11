@@ -1,17 +1,20 @@
-# Tree subsetter
+#!/usr/bin/env python3
+
+# Subset a tree sequence according to various sampling schemes
+# Path: scripts/subset_tree.py
+# Run from the root directory with `python ./scripts/subset_tree.py <tree_name>`
+# Runs on all subsets of tree sequence <tree_name> by default
 
 import tskit
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import json
-from typing import List, Dict
+from typing import Dict
 from enum import Enum
 from dataclasses import dataclass
-import random
 import logging
 import sys
-from datetime import datetime
 
 # Configure logging
 logging.basicConfig(

@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+# Run gaia inference on various sampling schemes from a tree sequence
+# Path: scripts/run_gaia.R
+# Run from the root directory with `Rscript ./scripts/run_gaia.R <tree_name>`
+
 # Load required libraries
 suppressPackageStartupMessages({
   library(data.table)

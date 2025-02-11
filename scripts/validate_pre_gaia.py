@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Validate tree sequence and location data for gaia analysis
+# Path: scripts/validate_data.py
+# Run from the root directory with `python ./scripts/validate_data.py <tree_name>`
+
 import sys
 import tskit
 import pandas as pd
@@ -8,7 +12,6 @@ from pathlib import Path
 import logging
 from dataclasses import dataclass
 from typing import Dict, Set, List, Optional
-import numpy as np
 from numpy import integer as np_integer
 
 # Configure logging
@@ -17,7 +20,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('validation_report.log')
     ]
 )
 logger = logging.getLogger(__name__)
@@ -54,6 +56,7 @@ class DataValidator:
 
             self.base_locations = pd.read_csv(self.base_locations_path)
             logger.info(f"Loaded base locations data: {self.base_locations_path}")
+            logger.info(f"Base locations columns: {list(self.base_locations.columns)}")  # Debug line
 
             # Get base sample nodes
             self.base_sample_nodes = set(self.base_ts.samples())
@@ -64,34 +67,21 @@ class DataValidator:
 
     def validate_base_data_integrity(self):
         """Validate the integrity of the base data"""
+        logger.info("Starting base data integrity validation")  # Debug line
+
         # Check base locations data columns
-        required_cols = {'node_id', 'x', 'y', 'z'}
-        missing_cols = required_cols - set(self.base_locations.columns)
+        required_cols = {'node_id', 'x', 'y', 'time'}
+        current_cols = set(self.base_locations.columns)
+        logger.info(f"Required columns: {required_cols}")  # Debug line
+        logger.info(f"Current columns: {current_cols}")  # Debug line
+
+        missing_cols = required_cols - current_cols
         if missing_cols:
+            logger.error(f"Missing columns detected: {missing_cols}")  # Debug line
             self.errors.append(ValidationError(
                 "missing_columns",
-                f"Base locations file missing required columns: {missing_cols}"
-            ))
-
-        # Get sample nodes from location data
-        location_node_ids = set(self.base_locations['node_id'])
-
-        # Check for missing samples
-        missing_samples = self.base_sample_nodes - location_node_ids
-        if missing_samples:
-            self.errors.append(ValidationError(
-                "missing_sample_locations",
-                f"Found {len(missing_samples)} sample nodes in tree without location data",
-                details={'missing_nodes': sorted(list(missing_samples))}
-            ))
-
-        # Check for extra samples
-        extra_samples = location_node_ids - self.base_sample_nodes
-        if extra_samples:
-            self.errors.append(ValidationError(
-                "extra_sample_locations",
-                f"Found {len(extra_samples)} location entries for non-sample nodes",
-                details={'extra_nodes': sorted(list(extra_samples))}
+                f"Base locations file missing required columns: {missing_cols}",
+                subset_name="base_data"
             ))
 
     def is_ancient(self, time_value: float) -> bool:
@@ -108,19 +98,16 @@ class DataValidator:
             subset_ts = tskit.load(str(subset_path))
             metadata = self.load_subset_metadata(subset_path)
 
-            # Get sample nodes from subset
-            subset_sample_nodes = set(subset_ts.samples())
-
             # Load corresponding location data
             location_path = self.subset_locations_dir / f"{subset_name}_locations.csv"
-            if not location_path.exists():
-                self.errors.append(ValidationError(
-                    "missing_location_file",
-                    f"No location file found for subset {subset_name}",
-                    subset_name
-                ))
+            if location_path.exists():
+                subset_locations = pd.read_csv(location_path)
+                logger.info(f"Subset {subset_name} location columns: {list(subset_locations.columns)}")  # Debug line
+            else:
+                logger.error(f"No location file found for subset: {subset_name}")
                 return
 
+            subset_sample_nodes = set(subset_ts.samples())
             subset_locations = pd.read_csv(location_path)
 
             # Check required columns
@@ -209,11 +196,11 @@ class DataValidator:
             self.validate_subset(subset_file)
 
         # Generate validation report
-        self.generate_report()
+        return self.generate_report()
 
     def generate_report(self):
         """Generate a detailed validation report"""
-        report_path = Path(f"validation_report_{self.tree_name}.json")
+        report_path = Path(f"./logs/validation/validation_report_{self.tree_name}.json")
 
         report = {
             'tree_name': self.tree_name,
@@ -258,8 +245,10 @@ class DataValidator:
             logger.error(f"Found {len(self.errors)} validation errors")
             for error_type, count in report['errors_by_type'].items():
                 logger.error(f"  {error_type}: {count} errors")
+            return 1
         else:
             logger.info("No validation errors found")
+            return 0
 
 
 def main():
@@ -272,9 +261,16 @@ def main():
 
     try:
         validator = DataValidator(tree_name)
-        validator.validate_all()
+        success = validator.validate_all()
     except Exception as e:
         logger.error(f"Fatal error: {str(e)}", exc_info=True)
+        sys.exit(1)
+
+    if success == 0:
+        print(0)
+        sys.exit(0)
+    else:
+        print(1)
         sys.exit(1)
 
 

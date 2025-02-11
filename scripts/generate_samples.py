@@ -1,4 +1,10 @@
-import sys
+#!/usr/bin/env python3
+
+# Generate sample location data from tree sequences
+# Path: scripts/generate_samples.py
+# Run from the root directory with `python ./scripts/generate_samples.py <tree_name>`
+# Use --subsets flag to process all subset trees in ./trees/subsets/{tree_name} (desired behavior)
+
 import tskit
 import pandas as pd
 from pathlib import Path
@@ -69,7 +75,7 @@ def create_location_csv(tree_path, output_path, ancient_ids=None, subset_mode=Fa
                                 'pedigree_id': individual.metadata.get('pedigree_id', None),
                                 'x': x,
                                 'y': y,
-                                'z': 0.0,
+                                'time': ts.individuals()[individual_id].time,
                                 'is_ancient': individual.metadata.get('pedigree_id', None) in ancient_ids
                             })
                     processed_individuals.add(individual_id)

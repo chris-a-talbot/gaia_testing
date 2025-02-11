@@ -1,7 +1,13 @@
+#!/usr/bin/env python3
+
+# Checks a tree sequence for coalescence properties in a sexual diploid population
+# Path: scripts/coalescent_check.py
+# Run from the root directory with `python ./scripts/coalescent_check.py <tree_name>`
+
+import sys
 import tskit
 import argparse
 from pathlib import Path
-
 
 def has_unary_descendants(tree, node):
     """
@@ -102,8 +108,13 @@ def main():
     print(f"Has unary descendants from roots: {'Yes' if has_unary else 'No'}")
     print(f"All trees coalesce to ≤2 individuals: {'Yes' if all_properly_coalesced else 'No'}")
 
-    return 0
+    if coalescence_status and all_properly_coalesced:
+        print(0)
+        sys.exit(0)
+    else:
+        print(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    exit(main())
+    main()
