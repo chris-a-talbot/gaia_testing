@@ -1,0 +1,16 @@
+Pipeline for a single replicate:
+run_slim.slim -> coalescent_check.py -> subset_tree.py -> generate_samples.py -> validate_pre_gaia.py -> run_gaia.R -> analyze_gaia.py
+
+1. Run `run_slim.slim` to generate tree sequence
+2. Run `coalescent_check.py` to ensure SLiM simulation ran to coalescence
+3. Run `subset_tree.py` to subset the tree sequence to various sampling schemes
+4. Run `generate_samples.py` to generate sample location data from subset tree sequences
+5. Run `validate_pre_gaia.py` to validate the sample location data
+6. Run `run_gaia.R` to run gaia on the subset tree sequences and sample location data
+7. Run `analyze_gaia.py` to analyze the accuracy of geographic inference from gaia
+
+
+Pipeline for aggregating results:
+Once the above steps are completed, the following steps can be run to analyze the results:
+1. Run `aggregate_accuracy.py` to average the accuracy of geographic inference by sampling scheme from gaia
+
