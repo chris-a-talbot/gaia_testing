@@ -1,4 +1,50 @@
-## Pipeline for a single replicate
+## How to use this pipeline on an HPC
+
+### Directory structure
+```
+.
+├── README.md
+├── accuracy/
+│   └── subsets/
+├── inferred_locations/
+│   └── subsets/
+├── job_scripts/
+│   └── pipeline.sh
+├── logs/
+│   ├── hpc/
+│   ├── validation/
+│   └── test.txt
+├── sample_locations/
+│   ├── subsets/
+│   └── test_locations.csv
+├── scripts/
+│   ├── analyze_gaia.py
+│   ├── coalescent_check.py
+│   ├── generate_samples.py
+│   ├── run_gaia.R
+│   ├── run_slim.slim
+│   ├── subset_tree.py
+│   └── validate_pre_gaia.py
+└── trees/
+   ├── subsets/
+   └── test.trees
+```
+
+### Required software
+
+- Python 3.x
+- R 4.x
+- SLiM 4.3+
+
+### Setup
+
+1. Clone the repository to an HPC with SLURM support.
+2. Ensure the directory structure is as shown above.
+3. Ensure you have Python, R, and SLiM installed on the HPC.
+4. Modify the `./job_scripts/pipeline.sh` file to reflect the desired parameters (ensure you have )
+5. Run the pipeline using the following command from root: `sbatch ./job_scripts/pipeline.sh`
+
+## Pipeline for a single replicate / running locally
 
 ### Overview
 
