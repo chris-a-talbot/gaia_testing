@@ -1,1 +1,9 @@
 .idea
+.Rproj.user
+accuracy
+inferred_locations
+sample_locations
+trees/subsets
+*.Rproj
+.RData
+.Rhistory

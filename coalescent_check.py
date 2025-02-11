@@ -86,7 +86,7 @@ print("-" * 80)
 num_trees = 10
 
 for i in range(1, num_trees + 1):
-    tree_path = f"../data/raw/trees/tree-S0.3-R{i}.trees"
+    tree_path = f"./trees/tree-S0.3-R{i}.trees"
     ts = tskit.load(tree_path)
 
     (coalescence_status, max_tmrca, max_roots, fraction_max_tmrca,
