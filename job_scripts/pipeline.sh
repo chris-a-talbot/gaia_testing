@@ -26,6 +26,7 @@ module use /nfs/turbo/lsa-bradburd/shared/Lmod/
 module load Bioinformatics
 module load SLiM/4.3
 module load R
+module load gcc/13.2.0
 
 echo "Starting pipeline for replicate ${REPLICATE_NAME} on node $(hostname) at $(date)"
 echo "Current working directory: $CWD"
