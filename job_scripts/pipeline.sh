@@ -21,12 +21,25 @@ DISPERSAL=0.3
 RUNTIME=40000
 REPLICATE_NAME="tree-S${DISPERSAL}-R${REPLICATE_ID}"
 
+STARTED_AT=$(date)
+
 # Load required modules
 module use /nfs/turbo/lsa-bradburd/shared/Lmod/
 module load Bioinformatics
 module load SLiM/4.3
-module load R
+module load R/4.4.0
 module load gcc/13.2.0
+module load python3.11-anaconda
+
+# Create logs directory if it doesn't exist
+mkdir -p "${CWD}/logs/hpc"
+
+# Initialize conda and activate environment
+source $(conda info --base)/etc/profile.d/conda.sh
+if ! conda activate gaia_testing; then
+    echo "Failed to activate conda environment gaia_testing"
+    exit 1
+fi
 
 echo "Starting pipeline for replicate ${REPLICATE_NAME} on node $(hostname) at $(date)"
 echo "Current working directory: $CWD"
@@ -61,9 +74,6 @@ run_step() {
         return 1
     fi
 }
-
-# Create logs directory if it doesn't exist
-mkdir -p "${CWD}/logs"
 
 # Run SLiM simulation
 if ! run_step "SLiM simulation" "slim -d \"PWD='$CWD'\" -d \"S=$DISPERSAL\" -d \"REP=$REPLICATE_ID\" -d \"RUNTIME=$RUNTIME\" ./scripts/run_slim.slim"; then
@@ -113,4 +123,13 @@ if ! run_step "Analyze GAIA" "python ./scripts/analyze_gaia.py \"$REPLICATE_NAME
     exit 1
 fi
 
-echo "Completed all steps for replicate ${REPLICATE_NAME} at $(date)"
+# Add at the end before final echo
+COMPLETED_AT=$(date)
+echo "
+=== Pipeline Summary ===
+Started at: ${STARTED_AT}
+Completed at: ${COMPLETED_AT}
+Tree name: ${REPLICATE_NAME}
+Job ID: ${SLURM_JOB_ID}
+Array task: ${SLURM_ARRAY_TASK_ID}
+===================" >> "${CWD}/logs/hpc/${SLURM_JOB_NAME}-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"

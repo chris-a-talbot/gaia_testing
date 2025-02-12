@@ -7,22 +7,37 @@
 
 import tskit
 import pandas as pd
+import logging
 from pathlib import Path
 import csv
 import argparse
+from typing import Set, List, Dict, Optional, Union
+import sys
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 
-def read_ancient_ids(log_path):
+def read_ancient_ids(log_path: Union[str, Path]) -> Set[int]:
     """
     Read pedigree IDs of ancient samples from log file
 
     Args:
-        log_path (str): Path to log file
+        log_path: Path to log file
 
     Returns:
-        set: Set of pedigree IDs for ancient samples
+        Set of pedigree IDs for ancient samples
     """
-    ancient_ids = set()
+    ancient_ids: Set[int] = set()
+    log_path = Path(log_path)
+
+    if not log_path.exists():
+        logging.warning(f"Log file not found: {log_path}")
+        return ancient_ids
+
     try:
         with open(log_path, 'r') as f:
             reader = csv.DictReader(f)
@@ -30,26 +45,41 @@ def read_ancient_ids(log_path):
                 # Convert string of comma-separated IDs into individual IDs
                 ids = row['pedigree_IDs'].strip('"').split(',')
                 ancient_ids.update(map(int, ids))
+        logging.info(f"Read {len(ancient_ids)} ancient IDs from {log_path}")
         return ancient_ids
     except Exception as e:
-        print(f"Error reading log file {log_path}: {str(e)}")
+        logging.error(f"Error reading log file {log_path}: {str(e)}")
         return set()
 
 
-def create_location_csv(tree_path, output_path, ancient_ids=None, subset_mode=False):
+def create_location_csv(
+        tree_path: Union[str, Path],
+        output_path: Union[str, Path],
+        ancient_ids: Optional[Set[int]] = None,
+        subset_mode: bool = False
+) -> str:
     """
     Create CSV with sample locations from a single tree sequence file
 
     Args:
-        tree_path (str): Path to .trees file
-        output_path (str): Full path for output CSV
-        ancient_ids (set, optional): Set of pedigree IDs for ancient samples
-        subset_mode (bool): If True, only output node_id, x, y, z columns
+        tree_path: Path to .trees file
+        output_path: Full path for output CSV
+        ancient_ids: Set of pedigree IDs for ancient samples
+        subset_mode: If True, only output node_id, x, y, z columns
+
+    Returns:
+        Status message string
     """
+    tree_path = Path(tree_path)
+    output_path = Path(output_path)
+
+    if not tree_path.exists():
+        return f"Error: Tree file not found: {tree_path}"
+
     try:
-        ts = tskit.load(tree_path)
-        sample_locations = []
-        processed_individuals = set()  # Track processed individuals to avoid duplicates
+        ts = tskit.load(str(tree_path))
+        sample_locations: List[Dict] = []
+        processed_individuals: Set[int] = set()
 
         # First process all sample nodes
         samples = ts.samples()
@@ -89,7 +119,6 @@ def create_location_csv(tree_path, output_path, ancient_ids=None, subset_mode=Fa
                     if pedigree_id in ancient_ids:
                         if len(individual.location) >= 2:
                             x, y = individual.location[0], individual.location[1]
-                            # Add an entry for each node associated with this individual
                             for node_id in individual.nodes:
                                 sample_locations.append({
                                     'node_id': node_id,
@@ -104,9 +133,10 @@ def create_location_csv(tree_path, output_path, ancient_ids=None, subset_mode=Fa
 
         # Create DataFrame and save
         df = pd.DataFrame(sample_locations)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(output_path, index=False)
 
-        # Print summary statistics
+        # Generate summary statistics
         total_samples = len(df)
         if subset_mode:
             return f"Successfully created {output_path} with {total_samples} nodes"
@@ -117,62 +147,82 @@ def create_location_csv(tree_path, output_path, ancient_ids=None, subset_mode=Fa
                     f"from {unique_individuals} individuals ({ancient_samples} ancient nodes)")
 
     except Exception as e:
+        logging.error(f"Error processing {tree_path}: {str(e)}")
         return f"Error processing {tree_path}: {str(e)}"
 
 
-def process_subsets(tree_name):
+def process_subsets(tree_name: str) -> None:
     """
     Process all tree sequences in the subsets directory for a given tree name
 
     Args:
-        tree_name (str): Name of the tree to process subsets for
+        tree_name: Name of the tree to process subsets for
     """
     subsets_dir = Path(f"./trees/subsets/{tree_name}")
     output_dir = Path(f"./sample_locations/subsets/{tree_name}")
-    output_dir.mkdir(parents=True, exist_ok=True)
 
     if not subsets_dir.exists():
-        print(f"Error: Subsets directory not found: {subsets_dir}")
+        logging.error(f"Subsets directory not found: {subsets_dir}")
         return
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # Process each .trees file in the subsets directory
-    for tree_file in subsets_dir.glob("*.trees"):
+    tree_files = list(subsets_dir.glob("*.trees"))
+    if not tree_files:
+        logging.warning(f"No .trees files found in {subsets_dir}")
+        return
+
+    for tree_file in tree_files:
         subset_name = tree_file.stem
         output_path = output_dir / f"{subset_name}_locations.csv"
-        result = create_location_csv(str(tree_file), str(output_path), subset_mode=True)
-        print(result)
+        result = create_location_csv(tree_file, output_path, subset_mode=True)
+        logging.info(result)
 
 
-def main():
+def main() -> int:
+    """
+    Main function to generate sample location data from tree sequences.
+
+    Returns:
+        0 for success, 1 for failure
+    """
     parser = argparse.ArgumentParser(description="Generate sample location data from tree sequences")
     parser.add_argument("tree_name", help="Name of the tree to process")
     parser.add_argument("--subsets", action="store_true",
-                      help="Process subset trees in ./trees/subsets/{tree_name}")
+                        help="Process subset trees in ./trees/subsets/{tree_name}")
     args = parser.parse_args()
 
-    if args.subsets:
-        # Process all subsets for the given tree name
-        process_subsets(args.tree_name)
-    else:
-        # Original processing for single tree
-        input_path = f"./trees/{args.tree_name}.trees"
-        log_path = Path("./logs") / f"{args.tree_name}.txt"
-        output_dir = "./sample_locations"
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
+    try:
+        if args.subsets:
+            process_subsets(args.tree_name)
+        else:
+            input_path = Path("./trees") / f"{args.tree_name}.trees"
+            log_path = Path("./logs") / f"{args.tree_name}.txt"
+            output_dir = Path("./sample_locations")
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Read ancient sample IDs from log file
-        ancient_ids = read_ancient_ids(log_path)
-        if not ancient_ids:
-            print("Warning: No ancient sample IDs found in log file")
-            return
+            if not input_path.exists():
+                logging.error(f"Tree file not found: {input_path}")
+                return 1
 
-        # Create output filename
-        output_path = Path(output_dir) / f"{args.tree_name}_locations.csv"
+            # Read ancient sample IDs from log file
+            ancient_ids = read_ancient_ids(log_path)
+            if not ancient_ids:
+                logging.warning("No ancient sample IDs found in log file")
+                return 1
 
-        # Process the file
-        result = create_location_csv(input_path, output_path, ancient_ids)
-        print(result)
+            # Create output filename and process
+            output_path = output_dir / f"{args.tree_name}_locations.csv"
+            result = create_location_csv(input_path, output_path, ancient_ids)
+            logging.info(result)
+
+            return 0 if "Successfully" in result else 1
+
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}")
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

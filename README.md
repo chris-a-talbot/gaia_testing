@@ -41,7 +41,7 @@
 
 1. Clone the repository to an HPC with SLURM support.
 2. Ensure the directory structure is as shown above.
-3. Ensure you have the required software installed on the HPC.
+3. Ensure you have the required softwareconda activate  installed on the HPC.
 4. Modify the `./job_scripts/pipeline.sh` file to reflect the desired parameters (ensure you have )
 5. Run the pipeline using the following command from root: `sbatch ./job_scripts/pipeline.sh`
 
